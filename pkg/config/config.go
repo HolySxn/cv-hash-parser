@@ -13,10 +13,10 @@ type ServerConfig struct {
 }
 
 type SMTPConfig struct {
-	From string `env:"FROM,default=test@gmail.com"`
-	Host string `env:"SMTP_HOST,default=smtp.gmail.com"`
-	Port string `env:"SMTP_PORT,default=587"`
-	Pass string `env:"SMTP_PASS,default=yourpassword"`
+	Login string `env:"LOGIN,default=test@gmail.com"`
+	Host  string `env:"HOST,default=smtp.gmail.com"`
+	Port  string `env:"PORT,default=587"`
+	Pass  string `env:"PASSWORD,default=yourpassword"`
 }
 
 type Config struct {
