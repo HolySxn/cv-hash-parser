@@ -23,8 +23,8 @@ This project is a Go-based web service that receives a URL to a Curriculum Vitae
 
 1.  Clone the repository:
     ```sh
-    git clone <repository-url>
-    cd <repository-directory>
+    git clone https://github.com/HolySxn/cv-hash-parser.git
+    cd cv-hash-parser
     ```
 
 2.  Create a `.env` file from the example:
