@@ -52,28 +52,18 @@ func TestService_ProcessCV(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ProcessCV() error = %v", err)
 	}
+	s.Wait()
 
 	files, err := os.ReadDir(".")
 	if err != nil {
 		t.Fatalf("failed to read directory: %v", err)
 	}
 
-	var reportFileName string
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), "report_") {
-			reportFileName = file.Name()
-			break
+			t.Errorf("report file %s was not deleted", file.Name())
 		}
 	}
 
-	if reportFileName == "" {
-		t.Fatal("report file was not created")
-	}
-
-	if _, err := os.Stat(reportFileName); os.IsNotExist(err) {
-		t.Errorf("report file %s was not created", reportFileName)
-	}
-
-	os.Remove(reportFileName)
 	os.RemoveAll("templates")
 }

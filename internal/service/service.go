@@ -81,6 +81,10 @@ func (s *Service) ProcessCV(url string) error {
 			s.logger.Info("email sent successfully in background", "user_id", userID)
 		}
 
+		// Delete report file after sending email
+		if removeErr := os.Remove(reportFileName); removeErr != nil {
+			s.logger.Error("failed to delete report file", "error", removeErr)
+		}
 	}()
 
 	return nil
