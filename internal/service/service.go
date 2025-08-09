@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -44,7 +45,7 @@ func (s *Service) Wait() {
 	s.wg.Wait()
 }
 
-func (s *Service) ProcessCV(url string) error {
+func (s *Service) ProcessCV(ctx context.Context, url string) error {
 	hash := s.calculateSHA256(url)
 	userID := s.generateUserID(hash)
 
@@ -69,16 +70,22 @@ func (s *Service) ProcessCV(url string) error {
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
-		err = s.smtp.Send(
-			s.recipient,
-			fmt.Sprintf("Golang Test – %s", userID),
-			htmlBody,
-			[]string{reportFileName, sourceCodeZip},
-		)
-		if err != nil {
-			s.logger.Error("failed to send email", "error", err)
-		} else {
-			s.logger.Info("email sent successfully in background", "user_id", userID)
+		select {
+		case <-ctx.Done():
+			s.logger.Error("email sending cancelled by context", "user_id", userID)
+			return
+		default:
+			err = s.smtp.Send(
+				s.recipient,
+				fmt.Sprintf("Golang Test – %s", userID),
+				htmlBody,
+				[]string{reportFileName, sourceCodeZip},
+			)
+			if err != nil {
+				s.logger.Error("failed to send email", "error", err)
+			} else {
+				s.logger.Info("email sent successfully in background", "user_id", userID)
+			}
 		}
 	}()
 
