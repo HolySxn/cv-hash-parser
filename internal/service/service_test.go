@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"log/slog"
 	"os"
 	"strings"
@@ -48,9 +47,8 @@ func TestService_ProcessCV(t *testing.T) {
 	s := NewService(logger, smtp, "test")
 
 	cvURL := "https://example.com/resume"
-	ctx := context.Background()
 
-	err := s.ProcessCV(ctx, cvURL)
+	err := s.ProcessCV(cvURL)
 	if err != nil {
 		t.Fatalf("ProcessCV() error = %v", err)
 	}

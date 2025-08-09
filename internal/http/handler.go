@@ -42,7 +42,7 @@ func (h *Handler) ParseHash(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.ProcessCV(r.Context(), req.CvURL); err != nil {
+	if err := h.service.ProcessCV(req.CvURL); err != nil {
 		h.logger.Error("failed to process cv", "error", err)
 		http.Error(w, "failed to process cv", http.StatusInternalServerError)
 		return
