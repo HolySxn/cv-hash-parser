@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"gopkg.in/gomail.v2"
@@ -8,20 +10,22 @@ import (
 
 type GomailSender struct {
 	dialer *gomail.Dialer
-	from   string
 }
 
-func NewGomailSender(host string, port int, username, password, from string) *GomailSender {
-	dialer := gomail.NewDialer(host, port, username, password)
+func NewGomailSender(host, port, username, password string) (*GomailSender, error) {
+	portInt, err := strconv.Atoi(port)
+	if err != nil {
+		return nil, fmt.Errorf("invalid SMTP port: %w", err)
+	}
+	dialer := gomail.NewDialer(host, portInt, username, password)
 	return &GomailSender{
 		dialer: dialer,
-		from:   from,
-	}
+	}, nil
 }
 
 func (s *GomailSender) Send(to, subject, body string, attachments []string) error {
 	m := gomail.NewMessage()
-	m.SetHeader("From", s.from)
+	m.SetHeader("From", s.dialer.Username)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", body)
@@ -38,4 +42,8 @@ func (s *GomailSender) Send(to, subject, body string, attachments []string) erro
 	}
 
 	return nil
+}
+
+func (s *GomailSender) GetEmail() string {
+	return s.dialer.Username
 }

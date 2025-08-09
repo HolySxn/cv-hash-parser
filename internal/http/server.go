@@ -9,7 +9,7 @@ func NewServer(
 ) http.Handler {
 	router := http.NewServeMux()
 
-	router.HandleFunc("/parse-hash", handler.ParseHash)
+	router.HandleFunc("POST /parse-hash", handler.ParseHash)
 
 	return router
 }

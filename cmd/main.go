@@ -11,6 +11,7 @@ import (
 	"time"
 
 	httpHandler "github.com/HolySxn/cv-hash-parser/internal/http"
+	"github.com/HolySxn/cv-hash-parser/internal/service"
 	"github.com/HolySxn/cv-hash-parser/pkg/config"
 )
 
@@ -27,10 +28,16 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
-	handler := httpHandler.NewHandler(logger)
+	smtpService, err := service.NewGomailSender(cfg.SMTP.Host, cfg.SMTP.Port, cfg.SMTP.Login, cfg.SMTP.Password)
+	if err != nil {
+		slog.Error("failed to create smtp service", "error", err)
+		os.Exit(1)
+	}
+	mainService := service.NewService(logger, smtpService, cfg.SMTP.Recipient)
+	handler := httpHandler.NewHandler(logger, mainService)
 	server := httpHandler.NewServer(handler)
 
-	run(ctx, cfg, logger, server)
+	run(ctx, cfg, logger, server, mainService)
 }
 
 func run(
@@ -38,6 +45,7 @@ func run(
 	cfg *config.Config,
 	logger *slog.Logger,
 	srv http.Handler,
+	mainService *service.Service,
 ) {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
@@ -72,5 +80,9 @@ func run(
 		logger.Info("HTTP server stopped.")
 	}()
 	wg.Wait()
+
+	logger.Info("Waiting for background jobs to finish...")
+	mainService.Wait()
+
 	logger.Info("Shutdown complete.")
 }
